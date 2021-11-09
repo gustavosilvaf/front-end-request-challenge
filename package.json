@@ -5,7 +5,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cy:run": "cypress run",
+    "test": "yarn jest"
   },
   "dependencies": {
     "@chakra-ui/core": "^0.8.0",

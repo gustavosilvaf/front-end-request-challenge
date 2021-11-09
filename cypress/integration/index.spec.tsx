@@ -5,13 +5,6 @@ describe("Testing index search page", () => {
     cy.visit("/");
   });
 
-  it("Should return response from request", () => {
-    cy.intercept({
-      method: "GET",
-    }).as("getProducts");
-    cy.wait("@getProducts").its("response.statusCode").should("eq", 200);
-  });
-
   it("Should can search an product and find just elements with pass key", () => {
     cy.get("[data-cy=search-input]").type("Kit");
     cy.get("[data-cy=submit]").click();
