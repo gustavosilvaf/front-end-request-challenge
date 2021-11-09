@@ -10,6 +10,24 @@ npm run dev
 yarn dev
 ```
 
+## Run tests
+
+First, run jest tests with:
+
+```bash
+yarn test
+# or
+npm run test
+```
+
+After, run cypress tests with:
+
+```bash
+yarn cy:run
+# or
+npm run cy:run
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
