@@ -9,7 +9,7 @@ const mockOptions = ["First shirt, second shirt"];
 describe("Search tests", () => {
   it("Should render corretly", () => {
     const { asFragment } = renderComponent();
-    expect(asFragment);
+    expect(asFragment).toMatchSnapshot();
   });
 
   it("Should render input and button", () => {

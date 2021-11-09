@@ -27,6 +27,7 @@ export const Search = ({
       >
         <Hint options={options}>
           <input
+            data-cy="search-input"
             width="100%"
             value={value}
             onChange={(e) => setValue(e.target.value)}
@@ -34,7 +35,12 @@ export const Search = ({
             placeholder="Search a product"
           />
         </Hint>
-        <Button type="submit" leftIcon={<BsSearch />} colorScheme="pink">
+        <Button
+          type="submit"
+          leftIcon={<BsSearch />}
+          colorScheme="pink"
+          data-cy="submit"
+        >
           Search
         </Button>
       </FormControl>
