@@ -22,7 +22,7 @@ describe("Testing index search page", () => {
     cy.get("[data-cy=suggestion]").should("have.length.greaterThan", 0);
   });
 
-  it.only("Should change type value when a suggestion was clicked", () => {
+  it("Should change type value when a suggestion was clicked", () => {
     cy.get("[data-cy=search-input]").type("camiseta");
 
     cy.get("[data-cy=suggestion]").first().click();
