@@ -1,56 +1,85 @@
-import { useState, useEffect, useCallback } from "react";
-import { Box, Flex, Spinner, SimpleGrid, Text } from "@chakra-ui/react";
-
-import { api } from "../services/api";
-import { useQuery } from "react-query";
-import { Product } from "../components/product";
+import { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Flex,
+  SimpleGrid,
+  Spinner,
+  Text,
+  HStack,
+} from "@chakra-ui/react";
 import { Search } from "../components/search";
+import { api } from "../services/api";
+import { useDebounce } from "../hooks/useDebbounce";
+import { Product } from "../components/product";
 
 export default function Home() {
-  const [value, setValue] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-  const { isFetching, data, isLoading } = useQuery(
-    "products",
-    async () => {
-      const response = await api.get("");
-      return response.data;
-    },
-    {
-      staleTime: 1000 * 5,
-      // refetchInterval: 1000 * 5, # Time to refetch data
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      setIsSearching(true);
+      searchCharacters(debouncedSearchTerm);
+    } else {
+      setSuggestions([]);
+      setIsSearching(false);
     }
-  );
+  }, [debouncedSearchTerm]);
 
-  const getProductsData = useCallback(
-    () => data?.products?.map((product) => product.name) ?? [],
-    [data?.products]
-  );
+  const searchCharacters = async (search) => {
+    setIsSearching(true);
+    const response = await api.get("autocomplete", {
+      params: {
+        content: search,
+        source: "nanook",
+      },
+    });
+    setIsSearching(false);
+    setSuggestions(response?.data.suggestions?.map((element) => element.term));
+  };
 
-  const getSuggestionsData = () =>
-    data?.suggestions?.map((suggestion) => suggestion.term) ?? [];
-
-  const options = getSuggestionsData();
-  const [products, setProducts] = useState<string[]>(getProductsData());
-
-  useEffect(() => setProducts(getProductsData()), [data, getProductsData]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setProducts(
-      getProductsData().filter((product) =>
-        product.toLowerCase().includes(value.toLowerCase())
-      ) ?? []
-    );
+  const handleSearch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!searchTerm) return;
+    const response = await api.get("autocomplete", {
+      params: {
+        content: searchTerm,
+        source: "nanook",
+      },
+    });
+    setProducts(response?.data.products?.map((element) => element.name));
   };
 
   return (
     <Box maxW={1280} mx="auto" px="6">
       <Search
         handleSearch={handleSearch}
-        options={options}
-        value={value}
-        setValue={setValue}
+        options={suggestions}
+        value={searchTerm}
+        setValue={setSearchTerm}
       />
+      <HStack gridGap="3" w="100%" flexWrap="wrap" mb="5">
+        {suggestions.map((suggestion) => (
+          <Button
+            data-cy="suggestion"
+            key={`key-${suggestion}`}
+            onClick={() => {
+              setSearchTerm(suggestion);
+              handleSearch();
+            }}
+            variant="outline"
+            colorScheme="purple"
+            _hover={{ bg: "purple.500", color: "gray.50" }}
+          >
+            {suggestion}
+          </Button>
+        ))}
+      </HStack>
+
       <Flex align="center" mb="2">
         <Text
           fontSize="24"
@@ -61,19 +90,15 @@ export default function Home() {
         >
           Products
         </Text>
-        {isFetching && <Spinner color="pink.500" size="md" ml="2" />}
+        {isSearching && <Spinner color="pink.500" size="md" ml="2" />}
       </Flex>
 
       <Flex w="100%" justify="center" align="center">
-        {isLoading ? (
-          <Spinner color="pink.500" size="lg" />
-        ) : (
-          <SimpleGrid flex="1" gap="4" minChildWidth="300px" align="flex-start">
-            {products.map((product) => (
-              <Product key={`product-${product}`} name={product} />
-            ))}
-          </SimpleGrid>
-        )}
+        <SimpleGrid flex="1" gap="4" minChildWidth="300px" align="flex-start">
+          {products.map((product) => (
+            <Product key={`product-${product}`} name={product} />
+          ))}
+        </SimpleGrid>
       </Flex>
     </Box>
   );
